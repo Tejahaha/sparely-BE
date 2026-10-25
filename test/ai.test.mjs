@@ -153,3 +153,26 @@ test('reminder date placeholders are inserted by code and altered dates or fees 
     'Hi Teja, the drill was due on {{due}} and {{due}}. Please contact the host.'
   ]) await withModel(() => ({ message }), async () => assert.equal(await reminderText(facts), reminderTemplate(facts)));
 });
+
+test('search uses what the model read: storage size, named area', async () => {
+  const reading = over => ({ categories: ['storage'], keywords: [], items: [], area: '', startDate: '', endDate: '', durationDays: 0, budget: 0, ...over });
+  await withModel(() => reading({ items: [{ name: 'boxes', count: 6 }] }), async store => {
+    const r = await assist(store, 'teja', { query: 'keep 6 boxes somewhere' });
+    assert.equal(r.storageNeedSqft, 9);
+    assert.match(r.suggestions[0].reason, /Room for the ~9 sq ft/);
+    assert.ok(!r.questions.some(q => /room for about/.test(q)));
+  });
+  await withModel(() => reading({ categories: ['storage', 'parking'], items: [{ name: 'boxes', count: 20 }, { name: 'cycle', count: 1 }] }), async store => {
+    const r = await assist(store, 'teja', { query: 'keep 20 boxes and a cycle' });
+    assert.deepEqual(r.understood.categories, ['storage'], 'a cycle to keep is storage, not parking');
+    assert.match(r.suggestions[0].reason, /^A storage option/, 'reason text is intact');
+    assert.equal(r.storageNeedSqft, 42);
+    assert.match(r.suggestions[0].reason, /Smaller than the ~42 sq ft/);
+    assert.ok(r.questions.some(q => /room for about 42 sq ft/.test(q)));
+  });
+  await withModel(() => reading({ categories: ['creator'], area: 'Kondapur' }), async store => {
+    const r = await assist(store, 'teja', { query: 'creator gear near Kondapur' });
+    assert.equal(r.suggestions[0].listing.id, 'podcast-mics');
+    assert.match(r.suggestions[0].reason, /In Kondapur, the area you named/);
+  });
+});
