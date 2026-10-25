@@ -1,0 +1,21 @@
+{
+  "projectName": "Sparely",
+  "projectId": "curly-hall-00619367",
+  "region": "aws-ap-southeast-1",
+  "branchName": "sparely-app",
+  "branchId": "br-dry-tree-a1it1ceo",
+  "migrationBranchId": "br-billowing-star-a128bsc9",
+  "endpointId": "ep-jolly-moon-a1o8ih7r",
+  "database": "sparely_app",
+  "role": "sparely_app",
+  "databaseMigration": "verified",
+  "apiDeployment": "completed and authenticated API calls verified",
+  "functionSlug": "sparelyapi",
+  "functionDeploymentId": 1,
+  "deployedArchiveSha256": "8a20472c8242ea6f508cad7cfc19458a5f8a9598a87dbf086e70782914f33d05",
+  "functionRuntime": "nodejs24",
+  "functionInvocationUrl": "https://br-dry-tree-a1it1ceo-sparelyapi.compute.c-1.ap-southeast-1.aws.neon.tech/",
+  "functionAccess": "server-only X-Secret; native browser calls return 401",
+  "watchdog": { "name": "sparely-watchdog", "path": "/internal/watchdog", "scheduleUtc": "*/5 * * * *", "enabled": true, "deliveryVerification": "invocation begin/end observed at 2026-10-24T14:30Z and 14:35Z; response status not exposed by console logs" },
+  "frontendDeployment": "not deployed"
+}

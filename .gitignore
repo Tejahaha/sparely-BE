@@ -1,0 +1,12 @@
+node_modules/
+data/
+backups/
+.deploy/
+.migration-work/
+.testdata/
+.vercel/
+.env
+.env.*
+!.env.example
+!.env.ollama-gateway.example
+*.tsbuildinfo
