@@ -176,3 +176,35 @@ test('search uses what the model read: storage size, named area', async () => {
     assert.match(r.suggestions[0].reason, /In Kondapur, the area you named/);
   });
 });
+
+test('meaning-based matching finds listings the words alone miss, and switches off cleanly', async () => {
+  // Fake embedding model: one axis for "fixing things to walls", one for "lighting a shoot".
+  const vector = text => [/drill|hang|wall|mount/i.test(text) ? 1 : 0, /light|shoot/i.test(text) ? 1 : 0, 0.1];
+  const saved = { url: process.env.LLM_URL, fetch: globalThis.fetch };
+  process.env.LLM_URL = 'http://llm.test';
+  let embeddingsOn = true;
+  globalThis.fetch = async (url, init) => {
+    const request = JSON.parse(init.body);
+    if (String(url).endsWith('/v1/embeddings')) return embeddingsOn
+      ? { ok: true, json: async () => ({ data: request.input.map((t, index) => ({ index, embedding: vector(t) })) }) }
+      : { ok: false, json: async () => ({}) };
+    return { ok: true, json: async () => ({ choices: [{ message: { content: 'not json' } }] }) }; // chat model "fails"
+  };
+  const store = new Store(':memory:');
+  try {
+    await store.ready;
+    const r = await assist(store, 'teja', { query: 'I want to hang a TV on the wall' });
+    assert.equal(r.matchedByMeaning, true);
+    assert.equal(r.suggestions[0].listing.id, 'drill-kit');
+    assert.match(r.suggestions[0].reason, /Closest match for what you described/);
+    assert.ok(r.suggestions.every(s => s.listing.id !== 'light-kit'), 'unrelated listings stay out');
+    embeddingsOn = false;
+    const off = await assist(store, 'teja', { query: 'I want to hang a TV on the wall' });
+    assert.equal(off.semantic, false);
+    assert.equal(off.suggestions.length, 0, 'without embeddings nothing is guessed');
+  } finally {
+    globalThis.fetch = saved.fetch;
+    if (saved.url === undefined) delete process.env.LLM_URL; else process.env.LLM_URL = saved.url;
+    await store.close();
+  }
+});

@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { limitedBody } from '../lib/http-body.mjs';
 
 // Run this on the Ollama PC, behind Tailscale Funnel. It exposes only the
-// chat-completions path and requires the same bearer token set as LLM_API_KEY
+// chat-completions and embeddings paths and requires the same bearer token set as LLM_API_KEY
 // in the deployed backend. Never expose Ollama's unauthenticated port itself.
 export function createOllamaGateway({
   token = process.env.OLLAMA_GATEWAY_TOKEN,
@@ -21,21 +21,23 @@ export function createOllamaGateway({
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     const json = (status, value) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(value)); };
-    if (req.url !== '/v1/chat/completions' || req.method !== 'POST') return json(404, { error: 'Not found.' });
+    // Chat for search/reminder wording; embeddings for meaning-based search (vectors are large).
+    const limits = { '/v1/chat/completions': [64_000, 256_000], '/v1/embeddings': [256_000, 8_000_000] }[req.url];
+    if (!limits || req.method !== 'POST') return json(404, { error: 'Not found.' });
     const supplied = /^Bearer (.+)$/.exec(String(req.headers.authorization || ''))?.[1];
     if (!supplied) return json(401, { error: 'Unauthorized' });
     const received = Buffer.from(supplied);
     if (expected.length !== received.length || !timingSafeEqual(expected, received)) return json(401, { error: 'Unauthorized' });
     if (!/^application\/json(?:;|$)/i.test(String(req.headers['content-type'] || ''))) return json(415, { error: 'JSON required.' });
     try {
-      const body = await limitedBody(req, 64_000);
-      const response = await fetch(new URL('/v1/chat/completions', target), {
+      const body = await limitedBody(req, limits[0]);
+      const response = await fetch(new URL(req.url, target), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,
         signal: AbortSignal.timeout(25_000),
       });
-      const content = await limitedBody(response.body, 256_000);
+      const content = await limitedBody(response.body, limits[1]);
       res.writeHead(response.status, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(content);
     } catch (error) {
