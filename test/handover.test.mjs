@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { Store } from '../lib/store.mjs';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { rentalPolicy } from '../lib/rental-policy.mjs';
 import { photo, storageIntake, storageProfile } from './fixtures.mjs';
 

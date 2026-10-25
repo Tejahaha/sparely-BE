@@ -4,7 +4,7 @@
 
 ## Layout and settings
 
-Use this `backend/` repository as the Vercel project root. `api/entry.mjs` adapts the existing Node API to a Vercel Function; `vercel.mjs` routes `/api/*` to it. `api/cron.mjs` exposes a separately authenticated watchdog. The frontend remains a separate Vercel project and rewrites same-origin `/api/*` to this backend origin. There is no client-side database or model credential. The **first Vercel publish can build without the two URLs**; API calls fail closed with 503 until the database and frontend origin are configured. After the frontend URL exists, put its HTTPS origin in the public-only `deployment.config.mjs` and push. `ALLOWED_ORIGINS` in Vercel Project Settings overrides the file.
+Use this `backend/` repository as the Vercel project root. The API lives in `main.mjs` (not `server.mjs`: Vercel auto-detects a root `server.mjs` and routes every request to it). `api/entry.mjs` adapts it to a Vercel Function; `vercel.json` routes `/api/*` to it. `api/cron.mjs` exposes a separately authenticated watchdog. The frontend remains a separate Vercel project and rewrites same-origin `/api/*` to this backend origin. There is no client-side database or model credential. The **first Vercel publish can build without the two URLs**; API calls fail closed with 503 until the database and frontend origin are configured. After the frontend URL exists, put its HTTPS origin in the public-only `deployment.config.mjs` and push. `ALLOWED_ORIGINS` in Vercel Project Settings overrides the file.
 
 Set these in **Vercel Project Settings → Environment Variables**, separately for Preview and Production; do not upload `.env`. Use `.env.example` only as a local template.
 
@@ -15,7 +15,7 @@ Set these in **Vercel Project Settings → Environment Variables**, separately f
 | `SPARELY_DEMO` | Required. `on` lets visitors switch into the shared demo profiles (Teja, Aanya, Kabir, Mira) without a password: anyone with the URL can use them, so share the link only with people you trust and keep only sample data there. `off` blocks them; their data stays. Real accounts work either way. Pair `on` with frontend `VITE_PUBLIC_DEMO=on`. |
 | `COOKIE_SECURE` | `1`; the adapter also forces Secure cookies. |
 | `CRON_SECRET` | New independent random value of at least 32 bytes for `/api/cron`. |
-| `SPARELY_CRON_SCHEDULE` | `*/5 * * * *` on a Vercel plan supporting five-minute cron; otherwise leave empty and configure a trusted external five-minute scheduler to call `GET /api/cron` with `Authorization: Bearer <CRON_SECRET>`. |
+| (cron) | Hobby has no five-minute cron. Use a trusted external scheduler calling `GET /api/cron` with `Authorization: Bearer <CRON_SECRET>`, or add a `crons` entry to `vercel.json` on a plan that supports it. |
 | `LLM_URL`, `LLM_MODEL`, `LLM_API_KEY`, `LLM_TIMEOUT_MS` | Optional server-only OpenAI-compatible model endpoint. Leave `LLM_URL` unset when no secured, publicly reachable model endpoint is available. |
 | `SPARELY_BUILD_ID` | Optional release label shown in `/api/health`. |
 

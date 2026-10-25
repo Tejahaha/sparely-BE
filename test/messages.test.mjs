@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 
 const dates = (days = 1) => ({ start: new Date(Date.now() + days * 86400000).toISOString(), end: new Date(Date.now() + (days + 1) * 86400000).toISOString() });
 const later = (hours = 24) => new Date(Date.now() + hours * 3600000).toISOString();

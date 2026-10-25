@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { assist } from '../lib/assistant.mjs';
 import { equipmentProfile } from './fixtures.mjs';
 

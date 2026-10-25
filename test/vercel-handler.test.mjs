@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 process.env.SPARELY_DEMO = 'off';
-const { createApplication } = await import('../server.mjs');
+const { createApplication } = await import('../main.mjs');
 const { createVercelHandler } = await import('../lib/vercel-handler.mjs');
 
 test('Vercel adapter forwards API paths, query strings and secure cookies; cron requires its secret', async () => {

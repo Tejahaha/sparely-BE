@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { attachDatabasePool } from '@neon/functions';
 import { parseTriggerDelivery } from '@neon/functions/triggers';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { apiHeaders, limitedBody } from '../lib/http-body.mjs';
 
 export function createNeonHandler({ secret = process.env.ORIGIN_SECRET, applicationFactory = createApplication } = {}) {

@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import { Store } from '../lib/store.mjs';
 import { fingerprint } from '../lib/commands.mjs';
 import { evidenceDigest } from '../lib/recovery.mjs';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { backupDatabase } from '../lib/backup.mjs';
 const photo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aCWQAAAAASUVORK5CYII=';
 const dates = () => ({

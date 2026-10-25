@@ -5,7 +5,7 @@ import { mkdirSync, unlinkSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Store, quote, timeRange } from '../lib/store.mjs';
 import { assist } from '../lib/assistant.mjs';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 const photo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aCWQAAAAASUVORK5CYII=';
 const dates = (offset = 2, days = 1) => ({
   start: new Date(Date.now() + offset * 86400_000).toISOString(),

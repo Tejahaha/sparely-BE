@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "node ../scripts/dev.mjs --backend",
-    "start": "node --env-file-if-exists=.env server.mjs",
+    "start": "node --env-file-if-exists=.env main.mjs",
     "check": "node scripts/check.mjs",
     "backup": "node --env-file-if-exists=.env scripts/backup.mjs",
     "test": "node --test --test-force-exit --test-timeout=120000 test/*.test.mjs",

@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { createNeonHandler } from '../functions/handler.mjs';
 import { checkImage } from '../lib/images.mjs';
 import { validImage } from '../lib/store.mjs';

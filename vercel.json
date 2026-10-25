@@ -1,0 +1,4 @@
+{
+  "functions": { "api/*.mjs": { "maxDuration": 60 } },
+  "rewrites": [{ "source": "/api/:path*", "destination": "/api/entry?sparelyPath=:path*" }]
+}

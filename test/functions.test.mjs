@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createNeonHandler } from '../functions/handler.mjs';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { createServer } from 'node:http';
 import { createRemoteProxy } from '../lib/remote-proxy.mjs';
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { createApplication } from '../server.mjs';
+import { createApplication } from '../main.mjs';
 import { photo } from './fixtures.mjs';
 
 const dates = (offset = 2, days = 1) => ({ start: new Date(Date.now() + offset * 86400_000).toISOString(), end: new Date(Date.now() + (offset + days) * 86400_000).toISOString() });
