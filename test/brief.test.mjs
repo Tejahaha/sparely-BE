@@ -60,3 +60,20 @@ test('a safe model brief is used; verdicts, invented numbers or unknown refs fal
     { ...good(), happened: [line('The item was rented.', ['F999'])] }
   ]) await withCase(() => bad, async (store, b) => assert.equal((await caseBrief(store, b.id, 'mira', { ai: true })).source, 'facts'));
 });
+
+test('demo scenarios for the brief put both sides on record', async () => {
+  const store = new Store(':memory:');
+  try {
+    await store.ready;
+    const dispute = await caseBrief(store, (await store.createScenario('dispute')).id, 'mira');
+    assert.match(dispute.brief.hostSays.text, /₹800/);
+    assert.match(dispute.brief.renterSays.text, /disputed/);
+    const missing = await store.createScenario('missing');
+    assert.equal(missing.recovery.open, 1, 'a recovery case is open');
+    const brief = await caseBrief(store, missing.id, 'mira');
+    assert.match(brief.brief.hostSays.text, /by the host/);
+    assert.match(brief.brief.renterSays.text, /by the renter/);
+  } finally {
+    await store.close();
+  }
+});
