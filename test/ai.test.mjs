@@ -87,12 +87,12 @@ test('search ignores past dates and falls back to keyword rules when the model f
 
 test('reminder wording from the model is used only when it is safe and keeps the due date', async () => {
   const facts = { name: 'Teja', item: 'Storage nook', due: '12 Dec, 10:00 am', dueDay: 12, stage: 1, storage: true };
-  await withModel(() => ({ message: 'नमस्ते Teja, आपका सामान 12 Dec, 10:00 am तक लेना था। कृपया होस्ट से बात करें या बुकिंग पर समय बढ़ाने का अनुरोध करें।' }), async () => {
-    assert.match(await reminderText(facts, 'hi'), /नमस्ते/);
+  await withModel(() => ({ message: 'Hi Teja, your things were due to be collected on 12 Dec, 10:00 am. Please speak to the host or request more time on the booking.' }), async () => {
+    assert.match(await reminderText(facts), /speak to the host/);
   });
   for (const bad of ['Hi Teja, pay ₹500 fine now for 12 Dec.', 'Hi Teja, please return it by 14 Dec.', 'Hi Teja, please return it soon or we call the police.']) {
     await withModel(() => ({ message: bad }), async () => {
-      assert.equal(await reminderText(facts, 'en'), reminderTemplate(facts), bad);
+      assert.equal(await reminderText(facts), reminderTemplate(facts), bad);
     });
   }
 });
@@ -111,33 +111,6 @@ test('overdue rentals get one reminder per stage, also without a model', async (
   } finally {
     await store.close();
   }
-});
-
-test('messages are translated for the reader, numbers must survive, results are cached', async () => {
-  let answer = { alreadyInTarget: false, translation: 'कल सुबह 10 बजे आइए, कोड 4821 है।' };
-  await withModel(() => answer, async (store, calls) => {
-    const { id } = await store.messages.openEnquiry('light-kit', 'teja');
-    await store.messages.send(id, 'teja', { body: 'Come tomorrow at 10 am, code is 4821.' });
-    await store.messages.send(id, 'teja', { body: 'Price is 300 per day?' });
-    const host = (await store.listing('light-kit')).ownerId;
-    await assert.rejects(() => store.messages.setLanguage(host, 'fr'));
-    assert.deepEqual(await store.messages.setLanguage(host, 'hi'), { language: 'hi' });
-    let page = await store.messages.page(id, host, {});
-    assert.ok(page.messages.every(m => m.translationPending));
-    const [first, second] = page.messages;
-    assert.equal((await store.messages.translate(first.id, host)).translation.body, answer.translation);
-    answer = { alreadyInTarget: false, translation: 'कीमत 500 प्रति दिन?' }; // changed a number
-    assert.equal((await store.messages.translate(second.id, host)).translation, null);
-    const before = calls.length;
-    await store.messages.translate(first.id, host);
-    assert.equal(calls.length, before, 'cached translations do not call the model again');
-    page = await store.messages.page(id, host, {});
-    assert.equal(page.messages[0].translation.body, 'कल सुबह 10 बजे आइए, कोड 4821 है।');
-    assert.equal(page.messages[1].translation, null);
-    assert.ok(page.messages.every(m => !m.translationPending));
-    assert.equal(page.messages[0].body, 'Come tomorrow at 10 am, code is 4821.', 'the original is unchanged');
-    assert.ok((await store.messages.page(id, 'teja', {})).messages.every(m => !('translation' in m)), 'the sender sees their own words');
-  });
 });
 
 test('explicit weekdays and their durations use calendar arithmetic even if the model is wrong', async () => {

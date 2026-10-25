@@ -128,10 +128,9 @@ export function createApplication({
           categories,
           cities: ['Hyderabad', 'Bengaluru'],
           demo: world === 'demo',
-          // 'local_model' = a self-hosted model (LLM_URL) helps search, reminders and translation.
+          // 'local_model' = a self-hosted model (LLM_URL) helps search and reminder wording.
           modelCalls: llmEnabled() ? 'local_model' : 'disabled',
-          assistantMode: llmEnabled() ? 'model' : 'local',
-          language: current ? await store.messages.language(current.id) : 'original'
+          assistantMode: llmEnabled() ? 'model' : 'local'
         };
       };
       // Rotate: a new sign-in or profile replaces the old session token.
