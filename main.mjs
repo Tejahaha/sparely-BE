@@ -13,6 +13,7 @@ import { publicRouteModules, routeModules } from './lib/routes/index.mjs';
 import { errorCode, logError, logRequest, routeTemplate } from './lib/ops.mjs';
 import { acceptRequestId } from './lib/http-body.mjs';
 import { frontendOrigin } from './deployment.config.mjs';
+import { caseBrief } from './lib/brief.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 // Extra browser origins allowed to mutate, e.g. a remote frontend dev proxy. Comma-separated exact origins.
 const allowedOrigins = String(process.env.ALLOWED_ORIGINS || frontendOrigin).split(',').map(o => o.trim()).filter(Boolean);
@@ -220,6 +221,12 @@ export function createApplication({
           httpStatus: result.status,
           createdAt: receipt.created_at
         });
+      }
+      // Operator case brief: facts gathered by code, condensed by the model when it is on.
+      safetyMatch = url.pathname.match(/^\/api\/bookings\/([^/]+)\/brief$/);
+      if (safetyMatch && req.method === 'GET') {
+        await store.accounts.limit(`brief:${user.id}`, 60, 600_000);
+        return json(await caseBrief(store, safetyMatch[1], user.id, { ai: url.searchParams.get('ai') === '1' }));
       }
       safetyMatch = url.pathname.match(/^\/api\/bookings\/([^/]+)\/(incidents|recovery)$/);
       if (safetyMatch?.[2] === 'incidents' && req.method === 'POST') return await command('incident', async () => await store.recovery.open(user.id, safetyMatch[1], input), 201, true);
