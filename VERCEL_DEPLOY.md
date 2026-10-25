@@ -12,7 +12,7 @@ Set these in **Vercel Project Settings → Environment Variables**, separately f
 | --- | --- |
 | `DATABASE_URL` | New rotated Neon PostgreSQL URL with certificate verification. Never use SQLite or an ephemeral Vercel filesystem. |
 | `ALLOWED_ORIGINS` | Optional override for `deployment.config.mjs`; exact HTTPS frontend origin, comma-separated if needed. Include only domains that may send writes. |
-| `SPARELY_DEMO` | `off` for this public API adapter. Shared demo identities must not be public. |
+| `SPARELY_DEMO` | Required. `on` lets visitors switch into the shared demo profiles (Teja, Aanya, Kabir, Mira) without a password: anyone with the URL can use them, so share the link only with people you trust and keep only sample data there. `off` blocks them; their data stays. Real accounts work either way. Pair `on` with frontend `VITE_PUBLIC_DEMO=on`. |
 | `COOKIE_SECURE` | `1`; the adapter also forces Secure cookies. |
 | `CRON_SECRET` | New independent random value of at least 32 bytes for `/api/cron`. |
 | `SPARELY_CRON_SCHEDULE` | `*/5 * * * *` on a Vercel plan supporting five-minute cron; otherwise leave empty and configure a trusted external five-minute scheduler to call `GET /api/cron` with `Authorization: Bearer <CRON_SECRET>`. |
@@ -30,7 +30,7 @@ Set these in **Vercel Project Settings → Environment Variables**, separately f
 5. Verify signup/login, Secure + HttpOnly + SameSite=Strict session cookie, listing read/write, foreign-Origin 403, 401 for unauthenticated cron, and five-minute successful `worker_runs` entries in Operations. Check on both desktop and phone.
 6. Keep a private off-device database backup and a practiced restore route. A Vercel rollback restores code, not database contents.
 
-The request path is restricted before forwarding to the existing API. The adapter refuses startup without PostgreSQL, a frontend origin and demo disabled. Oversized bodies fail with 413; backend failures return 503 with `Retry-After`, so clients can reconcile writes by their original idempotency key. The API does not silently switch databases. The worker records idempotent runs, but the five-minute schedule must be verified after deployment; request-time catch-up does not deliver reminders on time while nobody visits.
+The request path is restricted before forwarding to the existing API. The adapter refuses startup without PostgreSQL, a frontend origin and an explicit `SPARELY_DEMO`. Oversized bodies fail with 413; backend failures return 503 with `Retry-After`, so clients can reconcile writes by their original idempotency key. The API does not silently switch databases. The worker records idempotent runs, but the five-minute schedule must be verified after deployment; request-time catch-up does not deliver reminders on time while nobody visits.
 
 ## AI in production
 
